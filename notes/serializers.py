@@ -2,6 +2,12 @@ from rest_framework import serializers
 from .models import Note, Profile  
 from django.contrib.auth.models import User
 
+class NoteSerializer(serializers.ModelSerializer):
+    _id = serializers.ReadOnlyField(source='id')
+    class Meta:
+        model = Note
+        fields = ['_id', 'id', 'title', 'content', 'created_at']
+
 class RegisterSerializer(serializers.ModelSerializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -22,6 +28,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             email=validated_data.get('email', '')
         )
 
+       
         if hasattr(user, 'profile'):
             profile = user.profile
             profile.age = user_age

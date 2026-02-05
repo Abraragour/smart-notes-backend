@@ -6,6 +6,8 @@ class Note(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notes")
     title = models.CharField(max_length=200)
     content = models.TextField()
+    age = models.IntegerField(null=True, blank=True)
+    phone = models.CharField(max_length=11, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

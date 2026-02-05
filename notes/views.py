@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
+
 class RegisterApi(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -15,9 +16,17 @@ class RegisterApi(APIView):
                 serializer.save() 
                 return Response({"msg": "done"}, status=status.HTTP_201_CREATED)
             except Exception as e:
-                return Response({"msg": "Database error", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({
+                    "msg": "Database error", 
+                    "detail": "We couldn't save your data. This might be due to a duplicate entry that wasn't caught."
+                }, status=status.HTTP_400_BAD_REQUEST)
         
-        return Response({"msg": "Registration failed", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            "msg": "validation_error",
+            "errors": serializer.errors  
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 from django.contrib.auth import authenticate
@@ -29,25 +38,27 @@ class LoginApi(APIView):
         password = request.data.get('password')
 
         if not login_id or not password:
-            return Response({"msg": "Credentials missing"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"msg": "Credentials missing", "detail": "Please provide both email/username and password."}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_obj = User.objects.filter(email=login_id).first()
+        user_obj = User.objects.filter(email=login_id).first() or User.objects.filter(username=login_id).first()
+        
         if not user_obj:
-            user_obj = User.objects.filter(username=login_id).first()
+            return Response({"msg": "user_not_found", "detail": "No account found with this email or username."}, status=status.HTTP_404_NOT_FOUND)
 
-        if user_obj:
-            user = authenticate(username=user_obj.username, password=password)
-            if user:
-                token, _ = Token.objects.get_or_create(user=user)
-                return Response({
-                    'msg': 'done',
-                    'token': token.key,
-                    'username': user.username,
-                    'user_id': user.pk,
-                    'message': 'Login successful'
-                })
+        user = authenticate(username=user_obj.username, password=password)
+        
+        if user:
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({
+                'msg': 'done',
+                'token': token.key,
+                'username': user.username,
+                'user_id': user.pk,
+                'message': 'Login successful'
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({"msg": "wrong_password", "detail": "The password you entered is incorrect. Please try again."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        return Response({"msg": "Unable to log in with provided credentials."}, status=status.HTTP_400_BAD_REQUEST)
 
 class NoteListApi(APIView):
     permission_classes = [IsAuthenticated]

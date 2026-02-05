@@ -6,7 +6,7 @@ from .serializers import NoteSerializer, RegisterSerializer
 from rest_framework.permissions import IsAuthenticated 
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
-
+from django.contrib.auth.models import User
 class RegisterApi(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -20,9 +20,37 @@ class RegisterApi(APIView):
         return Response({"msg": "Registration failed", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LoginApi(ObtainAuthToken):
+from django.contrib.auth import authenticate
+
+class LoginApi(APIView): 
     def post(self, request, *args, **kwargs):
+        login_id = request.data.get('username') or request.data.get('email')
+        password = request.data.get('password')
+
+        if not login_id or not password:
+            return Response({"msg": "Credentials missing"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_obj = User.objects.filter(email=login_id).first()
         
+        if not user_obj:
+            user_obj = User.objects.filter(username=login_id).first()
+
+        if user_obj:
+            user = authenticate(username=user_obj.username, password=password)
+            if user:
+                token, _ = Token.objects.get_or_create(user=user)
+                return Response({
+                    'msg': 'done',
+                    'token': token.key,
+                    'username': user.username,
+                    'user_id': user.pk,
+                    'message': 'Login successful'
+                })
+
+        # لو وصلنا هنا يبقى البيانات غلط
+        return Response({"msg": "Unable to log in with provided credentials."}, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+
         serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         

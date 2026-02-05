@@ -18,6 +18,8 @@ class RegisterApi(APIView):
                 return Response({"msg": "Database error", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         return Response({"msg": "Registration failed", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class LoginApi(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})

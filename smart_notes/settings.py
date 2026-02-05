@@ -130,6 +130,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
 }
-CORS_ALLOWED_ORIGINS = [
-    "https://notes-lilac-alpha.vercel.app",
+CSRF_TRUSTED_ORIGINS = [
+    "https://smart-notes-backend-production.up.railway.app"
 ]

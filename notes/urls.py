@@ -18,16 +18,13 @@ from django.urls import path
 from .views import NoteListApi, NoteDetailApi, RegisterApi, LoginApi
 
 urlpatterns = [
-    # 1. عرض كل النوتس أو إضافة نوت جديدة
-    # الرابط: http://127.0.0.1:8000/api/notes/
+
     path('notes/', NoteListApi.as_view(), name='note-list'),
     
-    # 2. عرض نوت واحدة أو مسحها أو تعديلها (باستخدام الـ ID)
-    # الرابط: http://127.0.0.1:8000/api/notes/1/
+    
     path('notes/<int:pk>/', NoteDetailApi.as_view(), name='note-detail'),
     
-    # 3. تسجيل مستخدم جديد (Sign Up)
-    # الرابط: http://127.0.0.1:8000/api/register/
+    
     path('register/', RegisterApi.as_view(), name='register'),
     path('login/', LoginApi.as_view(), name='login'),
 ]

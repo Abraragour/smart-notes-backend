@@ -8,14 +8,14 @@ class NoteSerializer(serializers.ModelSerializer):
         model = Note
         fields = ['_id', 'id', 'title', 'content', 'created_at']
 class RegisterSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='username')
+    username = serializers.CharField()
     password = serializers.CharField(write_only=True)
     age = serializers.IntegerField(required=False)
     phone = serializers.CharField(required=False)
 
     class Meta:
         model = User
-        fields = ['name', 'email', 'password', 'age', 'phone']
+        fields = ['username', 'email', 'password', 'age', 'phone']
     def create(self, validated_data):
         user_age = validated_data.pop('age', None)
         user_phone = validated_data.pop('phone', None)

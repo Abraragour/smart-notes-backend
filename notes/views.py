@@ -11,11 +11,13 @@ class RegisterApi(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save() 
-            return Response({"msg": "done"}, status=status.HTTP_201_CREATED)
+            try:
+                serializer.save() 
+                return Response({"msg": "done"}, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({"msg": "Database error", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         return Response({"msg": "Registration failed", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
 class LoginApi(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
@@ -24,7 +26,6 @@ class LoginApi(ObtainAuthToken):
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
         
-        # التعديل هنا: التوكن رجع صافي زي ما كنتِ كاتباه، وضفنا بس msg: done
         return Response({
             'msg': 'done',
             'token': token.key,
@@ -39,7 +40,6 @@ class NoteListApi(APIView):
     def get(self, request):
         notes = Note.objects.filter(owner=request.user)
         serializer = NoteSerializer(notes, many=True)
-        # تغليف المصفوفة في كلمة notes عشان الرياكت يشوفها
         return Response({"msg": "done", "notes": serializer.data})
 
     def post(self, request):

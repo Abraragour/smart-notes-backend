@@ -1,0 +1,13 @@
+# Django
+db.sqlite3
+__pycache__/
+*.pyc
+
+# Environment (البيئة الافتراضية)
+WEB/
+venv/
+env/
+
+# OS files
+.DS_Store
+Thumbs.db

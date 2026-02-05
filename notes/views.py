@@ -22,6 +22,7 @@ class RegisterApi(APIView):
 
 from django.contrib.auth import authenticate
 
+
 class LoginApi(APIView): 
     def post(self, request, *args, **kwargs):
         login_id = request.data.get('username') or request.data.get('email')
@@ -31,7 +32,6 @@ class LoginApi(APIView):
             return Response({"msg": "Credentials missing"}, status=status.HTTP_400_BAD_REQUEST)
 
         user_obj = User.objects.filter(email=login_id).first()
-        
         if not user_obj:
             user_obj = User.objects.filter(username=login_id).first()
 
@@ -47,23 +47,7 @@ class LoginApi(APIView):
                     'message': 'Login successful'
                 })
 
-        # لو وصلنا هنا يبقى البيانات غلط
         return Response({"msg": "Unable to log in with provided credentials."}, status=status.HTTP_400_BAD_REQUEST)
-    def post(self, request, *args, **kwargs):
-
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        
-        return Response({
-            'msg': 'done',
-            'token': token.key,
-            'username': user.username,
-            'user_id': user.pk,
-            'message': 'Login successful'
-        })
 
 class NoteListApi(APIView):
     permission_classes = [IsAuthenticated]
